@@ -1,0 +1,15 @@
+trigger:
+- main
+
+pool:
+  name: ProductAPI-Pool
+
+steps:
+- script: python --version
+  displayName: 'Check Python version'
+
+- script: python -m pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- script: python -m pytest tests/ -v
+  displayName: 'Run unit tests'SS
