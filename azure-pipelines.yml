@@ -1,15 +1,52 @@
 trigger:
-- main
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
 
 pool:
   name: ProductAPI-Pool
 
-steps:
-- script: python --version
-  displayName: 'Check Python version'
+variables:
+  pythonVersion: '3.13'
+  dockerHubServiceConnection: 'dockerhub-connection'
+  imageRepository: 'YOUR_DOCKERHUB_USERNAME/product-api'
+  imageTag: 'latest'
 
-- script: python -m pip install -r requirements.txt
-  displayName: 'Install dependencies'
+stages:
+  - stage: BuildAndTest
+    displayName: Build and test
+    jobs:
+      - job: PythonTests
+        displayName: Install dependencies and run unit tests
+        steps:
+          - script: |
+              python --version
+              python -m pip install --upgrade pip
+              python -m pip install -r requirements.txt
+            displayName: Install Python dependencies
 
-- script: python -m pytest tests/ -v
-  displayName: 'Run unit tests'
+          - script: python -m pytest tests/ -v
+            displayName: Run unit tests
+
+  - stage: Docker
+    displayName: Build and publish Docker image
+    dependsOn: BuildAndTest
+    condition: succeeded()
+    jobs:
+      - job: DockerImage
+        displayName: Build, tag and push image
+        steps:
+          - task: Docker@2
+            displayName: Build and push Docker image
+            inputs:
+              command: buildAndPush
+              containerRegistry: '$(dockerHubServiceConnection)'
+              repository: '$(imageRepository)'
+              Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+              tags: |
+                $(imageTag)
