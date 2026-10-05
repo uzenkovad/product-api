@@ -14,7 +14,7 @@ pool:
 variables:
   pythonVersion: '3.13'
   dockerHubServiceConnection: 'dockerhub-connection'
-  imageRepository: 'YOUR_DOCKERHUB_USERNAME/product-api'
+  imageRepository: 'dshfff/product-api'
   imageTag: 'latest'
 
 stages:
