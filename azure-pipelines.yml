@@ -12,4 +12,4 @@ steps:
   displayName: 'Install dependencies'
 
 - script: python -m pytest tests/ -v
-  displayName: 'Run unit tests'SS
+  displayName: 'Run unit tests'
