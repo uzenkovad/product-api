@@ -9,7 +9,7 @@ pr:
       - main
 
 pool:
-  name: ProductAPI-Pool
+  name: Default
 
 variables:
   pythonVersion: '3.13'
