@@ -120,3 +120,5 @@ def delete_product(product_id: int):
     del products[product_id]
 
     return None
+
+# 11
