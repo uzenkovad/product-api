@@ -118,3 +118,4 @@ Remove the container if necessary:
 ```bash
 docker rm -f product-api-container
 ```
+GitHub Actions lab test.
