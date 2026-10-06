@@ -1,0 +1,71 @@
+name: Docker Pack and Push
+
+on:
+  workflow_call:
+    inputs:
+      repository:
+        description: 'Docker Hub repository name'
+        required: true
+        type: string
+
+      tag:
+        description: 'Docker image tag'
+        required: true
+        type: string
+
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+
+      DOCKERHUB_TOKEN:
+        required: true
+
+jobs:
+  docker:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # MAIN BRANCH
+
+      - name: Login to Docker Hub
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.repository }}:${{ inputs.tag }}
+
+      # FEATURE / BUGFIX BRANCHES
+
+      - name: Build Docker image for artifact
+        if: github.ref != 'refs/heads/main'
+        run: |
+          docker build \
+            -t ${{ inputs.repository }}:${{ inputs.tag }} \
+            .
+
+      - name: Save Docker image
+        if: github.ref != 'refs/heads/main'
+        run: |
+          docker save \
+            ${{ inputs.repository }}:${{ inputs.tag }} \
+            -o docker-image.tar
+
+      - name: Upload Docker image artifact
+        if: github.ref != 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: docker-image.tar
